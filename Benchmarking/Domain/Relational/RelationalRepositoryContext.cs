@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Relational;
 
-public class RepositoryContext : DbContext
+public class RelationalRepositoryContext : DbContext
 {
-    public RepositoryContext(DbContextOptions<RepositoryContext> options)
+    public RelationalRepositoryContext(DbContextOptions<RelationalRepositoryContext> options)
         : base(options)
     {
     }
