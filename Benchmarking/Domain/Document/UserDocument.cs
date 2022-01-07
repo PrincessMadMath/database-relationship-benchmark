@@ -6,8 +6,7 @@ namespace Domain.Document;
 
 public class UserDocument
 {
-    [BsonId]
-    public ObjectId Id { get; set; }
+    [BsonId] public ObjectId Id { get; set; }
 
     public Guid UserId { get; set; }
 

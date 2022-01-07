@@ -1,80 +1,53 @@
-﻿using Domain.Relational;
-using Faker;
+﻿using System.Diagnostics;
+using Domain.Relational;
 
 namespace Benchmark.Seed;
 
 public static class FakeDataGenerator
 {
-    public static (List<Group> Groups, List<User> Users) GenerateGroups(SeedInfo seedInfo)
+    public static (List<Group> Groups, List<User> Users) Generate(
+        Guid tenantId,
+        int groupCount,
+        int ownerCount,
+        int linkCount)
     {
-        var random = new Random();
+        var sw = Stopwatch.StartNew();
+        var (groups, users) = DoGenerate(tenantId, groupCount, ownerCount, linkCount);
 
-        var users = Enumerable.Range(0, seedInfo.UserCount).Select(x => new User
-        {
-            UserId = Guid.NewGuid(), Name = Name.FullName()
-        }).ToList();
+        Console.WriteLine($"Generate {groupCount} groups with {linkCount} links in {sw.ElapsedMilliseconds}ms");
 
-        var groups = Enumerable.Range(0, seedInfo.GroupCount).Select(x =>
-        {
-            var owners = users.Skip(random.Next( seedInfo.UserCount - seedInfo.OwnerCount)).Take(seedInfo.OwnerCount).ToList();
-
-            var links = Enumerable.Range(0, seedInfo.LinkCount).Select(x => new Link
-            {
-                LinkId = Guid.NewGuid(), Url = Internet.Url()
-            }).ToList();
-
-
-            return new Group { TenantId = seedInfo.TenantId, Name = Company.Name(), GroupId = Guid.NewGuid(), Owners = owners, Links = links};
-        });
-
-        return (groups.ToList(), users);
+        return (groups, users);
     }
 
-    public static (List<Group> Groups, List<User> Users) GenerateWithConstString(SeedInfo seedInfo)
+    private static (List<Group> Groups, List<User> Users) DoGenerate(
+        Guid tenantId,
+        int groupCount,
+        int ownerCount,
+        int linkCount)
     {
-        var random = new Random();
+        var users = new List<User>();
 
-        var users = Enumerable.Range(0, seedInfo.UserCount).Select(x => new User
+        var groups = Enumerable.Range(0, groupCount).Select(x =>
         {
-            UserId = Guid.NewGuid(), Name = "Test Name"
-        }).ToList();
+            var owners = Enumerable.Range(0, ownerCount).Select(_ => new User { UserId = Guid.NewGuid(), Name = "Test Name" })
+                .ToList();
 
-        var groups = Enumerable.Range(0, seedInfo.GroupCount).Select(x =>
-        {
-            var owners = users.Skip(random.Next( seedInfo.UserCount - seedInfo.OwnerCount)).Take(seedInfo.OwnerCount).ToList();
+            users.AddRange(owners);
 
-            var links = Enumerable.Range(0, seedInfo.LinkCount).Select(x => new Link
+            var links = Enumerable.Range(0, linkCount).Select(x => new Link
             {
                 LinkId = Guid.NewGuid(), Url = "www.localhost.com"
             }).ToList();
 
 
-            return new Group { TenantId = seedInfo.TenantId, Name = "Company", GroupId = Guid.NewGuid(), Owners = owners, Links = links};
-        });
-
-        return (groups.ToList(), users);
-    }
-
-    public static (List<Group> Groups, List<User> Users) GenerateWithConstStringAndSameOwners(SeedInfo seedInfo)
-    {
-        var random = new Random();
-
-        var users = Enumerable.Range(0, seedInfo.UserCount).Select(x => new User
-        {
-            UserId = Guid.NewGuid(), Name = "Test Name"
-        }).ToList();
-
-        var groups = Enumerable.Range(0, seedInfo.GroupCount).Select(x =>
-        {
-            var owners = users.Take(seedInfo.OwnerCount).ToList();
-
-            var links = Enumerable.Range(0, seedInfo.LinkCount).Select(x => new Link
+            return new Group
             {
-                LinkId = Guid.NewGuid(), Url = "www.localhost.com"
-            }).ToList();
-
-
-            return new Group { TenantId = seedInfo.TenantId, Name = "Company", GroupId = Guid.NewGuid(), Owners = owners, Links = links};
+                TenantId = tenantId,
+                Name = "Company",
+                GroupId = Guid.NewGuid(),
+                Owners = owners,
+                Links = links
+            };
         });
 
         return (groups.ToList(), users);

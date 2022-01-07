@@ -6,8 +6,7 @@ namespace Domain.Document;
 
 public class LinkDocument
 {
-    [BsonId]
-    public ObjectId Id { get; set; }
+    [BsonId] public ObjectId Id { get; set; }
 
     public Guid LinkId { get; set; }
 

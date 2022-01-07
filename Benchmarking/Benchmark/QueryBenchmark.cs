@@ -10,8 +10,8 @@ namespace Benchmark;
 [IterationCount(5)]
 public class QueryBenchmark
 {
-    private RelationalRepositoryContext _relationalRepositoryContext;
     private MongoRepository _mongoRepository;
+    private RelationalRepositoryContext _relationalRepositoryContext;
 
     [ParamsSource(nameof(Seeds))] public SeedInfo SeedInfo { get; set; }
 

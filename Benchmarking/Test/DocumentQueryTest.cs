@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Benchmark;
 using Benchmark.Seed;
 using Domain.Document;
 using Xunit;
@@ -10,9 +9,8 @@ namespace Test;
 
 public class DocumentQueryTest
 {
-    private readonly MongoRepository _mongoRepository;
-
     private static readonly Guid TenantWith100Groups = Guid.Parse("76482310-c21b-4496-b1ab-170cb7fbb657");
+    private readonly MongoRepository _mongoRepository;
 
     public DocumentQueryTest()
     {

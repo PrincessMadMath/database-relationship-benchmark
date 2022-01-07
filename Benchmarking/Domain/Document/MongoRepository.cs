@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace Domain.Document;
@@ -33,7 +31,8 @@ public class MongoRepository
         this.UserCollection = this.MongoDatabase.GetCollection<UserDocument>(UserCollectionName);
         this.LinkCollection = this.MongoDatabase.GetCollection<LinkDocument>(LinkCollectionName);
         this.GroupViewCollection = this.MongoDatabase.GetCollection<GroupViewDocument>(GroupViewCollectionName);
-        this.GroupViewMaterializedCollection = this.MongoDatabase.GetCollection<GroupViewDocument>(GroupViewMaterializedCollectionName);
+        this.GroupViewMaterializedCollection =
+            this.MongoDatabase.GetCollection<GroupViewDocument>(GroupViewMaterializedCollectionName);
     }
 
     public IMongoCollection<GroupDocument> GroupCollection { get; set; }
@@ -73,7 +72,8 @@ public class MongoRepository
             .SelectMany(x => x.ToAsyncEnumerable());
     }
 
-    public IAsyncEnumerable<TResult> AggregateAsyncEnumerable<TDocument, TResult>(IMongoCollection<TDocument> collection, PipelineDefinition<TDocument, TResult> pipeline)
+    public IAsyncEnumerable<TResult> AggregateAsyncEnumerable<TDocument, TResult>(
+        IMongoCollection<TDocument> collection, PipelineDefinition<TDocument, TResult> pipeline)
     {
         return AsyncEnumerable.Create(
                 token =>

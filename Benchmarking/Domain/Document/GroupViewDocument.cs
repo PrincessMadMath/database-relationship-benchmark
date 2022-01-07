@@ -5,8 +5,7 @@ namespace Domain.Document;
 
 public class GroupViewDocument
 {
-    [BsonId]
-    public ObjectId Id { get; set; }
+    [BsonId] public ObjectId Id { get; set; }
 
     public Guid TenantId { get; set; }
 

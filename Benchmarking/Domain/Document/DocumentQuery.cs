@@ -1,5 +1,4 @@
-﻿using Domain.Relational;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using Open.ChannelExtensions;
@@ -32,7 +31,7 @@ public class DocumentQuery
                 GroupId = groupDocument.GroupId,
                 Name = groupDocument.Name,
                 Owners = owners,
-                Links = links,
+                Links = links
             });
         }
 
@@ -66,7 +65,7 @@ public class DocumentQuery
                         GroupId = document.GroupId,
                         Name = document.Name,
                         Owners = owners,
-                        Links = links,
+                        Links = links
                     };
                 }
             ).ToListAsync();
@@ -79,12 +78,15 @@ public class DocumentQuery
     {
         var pipelineDefinition = new EmptyPipelineDefinition<GroupDocument>()
             .Match(Builders<GroupDocument>.Filter.Eq(d => d.TenantId, tenantId))
-            .Lookup<GroupDocument, GroupDocument, UserDocument, GroupWithUser>(repository.UserCollection, groupDocument => groupDocument.OwnersId,
+            .Lookup<GroupDocument, GroupDocument, UserDocument, GroupWithUser>(repository.UserCollection,
+                groupDocument => groupDocument.OwnersId,
                 userDocument => userDocument.UserId, x => x.Owners)
-            .Lookup<GroupDocument, GroupWithUser, LinkDocument, GroupViewDocument>(repository.LinkCollection, groupDocument => groupDocument.GroupId,
+            .Lookup<GroupDocument, GroupWithUser, LinkDocument, GroupViewDocument>(repository.LinkCollection,
+                groupDocument => groupDocument.GroupId,
                 linkDocument => linkDocument.GroupId, x => x.Links);
 
-        var groups = await repository.AggregateAsyncEnumerable(repository.GroupCollection, pipelineDefinition).ToListAsync();
+        var groups = await repository.AggregateAsyncEnumerable(repository.GroupCollection, pipelineDefinition)
+            .ToListAsync();
 
         return groups;
     }
@@ -104,7 +106,8 @@ public class DocumentQuery
     {
         var filter = Builders<GroupViewDocument>.Filter.Eq(d => d.TenantId, tenantId);
 
-        var groups = await repository.FindAsyncEnumerable(repository.GroupViewMaterializedCollection, filter).ToListAsync();
+        var groups = await repository.FindAsyncEnumerable(repository.GroupViewMaterializedCollection, filter)
+            .ToListAsync();
 
         return groups;
     }
@@ -112,8 +115,7 @@ public class DocumentQuery
     // TODO: Cleanup
     public class GroupDto
     {
-        [BsonId]
-        public ObjectId Id { get; set; }
+        [BsonId] public ObjectId Id { get; set; }
 
         public Guid TenantId { get; set; }
 
@@ -130,8 +132,7 @@ public class DocumentQuery
 
     public class GroupWithUser
     {
-        [BsonId]
-        public ObjectId Id { get; set; }
+        [BsonId] public ObjectId Id { get; set; }
 
         public Guid TenantId { get; set; }
 

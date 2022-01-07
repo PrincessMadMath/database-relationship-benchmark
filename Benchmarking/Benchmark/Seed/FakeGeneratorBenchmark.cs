@@ -7,30 +7,26 @@ namespace Benchmark.Seed;
 [IterationCount(5)]
 public class FakeGeneratorBenchmark
 {
-    [ParamsSource(nameof(Seeds))] public SeedInfo SeedInfo { get; set; }
+    [Params(100, 1000, 10000, 10000)] public int GroupCount { get; set; }
 
-    public IEnumerable<SeedInfo> Seeds => Seeder.Seeds;
+    public int OwnerCount { get; set; } = 5;
+
+    [Params(10, 1000)] public int LinkCount { get; set; }
+
+    public int UserCount { get; set; } = 5000;
+
 
     [GlobalSetup]
     public void Setup()
     {
     }
 
-    // [Benchmark]
-    // public void DefaultGenerator()
-    // {
-    //     FakeDataGenerator.GenerateGroups(this.SeedInfo);
-    // }
-
     [Benchmark]
-    public void GeneratorConstName()
+    public void DefaultGenerator()
     {
-        FakeDataGenerator.GenerateWithConstStringAndSameOwners(this.SeedInfo);
-    }
-
-    [Benchmark]
-    public void GeneratorConstNameSameOwner()
-    {
-        FakeDataGenerator.GenerateWithConstStringAndSameOwners(this.SeedInfo);
+        FakeDataGenerator.Generate(Guid.NewGuid(),
+            this.GroupCount,
+            this.OwnerCount,
+            this.LinkCount);
     }
 }
