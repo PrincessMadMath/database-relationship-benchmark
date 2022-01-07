@@ -9,4 +9,6 @@ public class Group
     public string Name { get; set; }
 
     public ICollection<User> Owners { get; set; }
+
+    public ICollection<Link> Links { get; set; }
 }

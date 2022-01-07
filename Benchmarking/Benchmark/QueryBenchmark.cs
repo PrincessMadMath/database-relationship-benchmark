@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using Benchmark.Seed;
+using BenchmarkDotNet.Attributes;
 using Domain.Document;
 using Domain.Relational;
 
@@ -12,9 +13,9 @@ public class QueryBenchmark
     private RelationalRepositoryContext _relationalRepositoryContext;
     private MongoRepository _mongoRepository;
 
-    [ParamsSource(nameof(Seeds))] public Seeder.SeedInfo SeedInfo { get; set; }
+    [ParamsSource(nameof(Seeds))] public SeedInfo SeedInfo { get; set; }
 
-    public IEnumerable<Seeder.SeedInfo> Seeds => Seeder.Seeds;
+    public IEnumerable<SeedInfo> Seeds => Seeder.Seeds;
 
     [GlobalSetup]
     public void Setup()
@@ -59,6 +60,22 @@ public class QueryBenchmark
     {
         var groups =
             await DocumentQuery.GetTenantWithLookup(this._mongoRepository,
+                this.SeedInfo.TenantId);
+    }
+
+    [Benchmark]
+    public async Task MongoView()
+    {
+        var groups =
+            await DocumentQuery.GetTenantOnView(this._mongoRepository,
+                this.SeedInfo.TenantId);
+    }
+
+    [Benchmark]
+    public async Task MongoViewMaterialized()
+    {
+        var groups =
+            await DocumentQuery.GetTenantOnViewMaterialized(this._mongoRepository,
                 this.SeedInfo.TenantId);
     }
 }

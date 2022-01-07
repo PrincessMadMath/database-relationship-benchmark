@@ -10,6 +10,10 @@ public class MongoRepository
 {
     public const string GroupCollectionName = "Groups";
     public const string UserCollectionName = "Users";
+    public const string LinkCollectionName = "Links";
+    public const string GroupViewCollectionName = "GroupsView";
+    public const string GroupViewMaterializedCollectionName = "GroupsViewMaterialized";
+
     public readonly IMongoDatabase MongoDatabase;
 
     public MongoRepository()
@@ -27,11 +31,20 @@ public class MongoRepository
 
         this.GroupCollection = this.MongoDatabase.GetCollection<GroupDocument>(GroupCollectionName);
         this.UserCollection = this.MongoDatabase.GetCollection<UserDocument>(UserCollectionName);
+        this.LinkCollection = this.MongoDatabase.GetCollection<LinkDocument>(LinkCollectionName);
+        this.GroupViewCollection = this.MongoDatabase.GetCollection<GroupViewDocument>(GroupViewCollectionName);
+        this.GroupViewMaterializedCollection = this.MongoDatabase.GetCollection<GroupViewDocument>(GroupViewMaterializedCollectionName);
     }
 
     public IMongoCollection<GroupDocument> GroupCollection { get; set; }
 
     public IMongoCollection<UserDocument> UserCollection { get; set; }
+
+    public IMongoCollection<LinkDocument> LinkCollection { get; set; }
+
+    public IMongoCollection<GroupViewDocument> GroupViewCollection { get; set; }
+
+    public IMongoCollection<GroupViewDocument> GroupViewMaterializedCollection { get; set; }
 
     public IAsyncEnumerable<TDocument> FindAsyncEnumerable<TDocument>(IMongoCollection<TDocument> collection,
         FilterDefinition<TDocument> filter)

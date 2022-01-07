@@ -3,23 +3,26 @@ using Domain.Document;
 using Domain.Relational;
 using MongoDB.Driver;
 
-namespace Benchmark;
+namespace Benchmark.Seed;
 
 public static class Seeder
 {
-    public const int UserCount = 5000;
-    public const int OwnerCount = 3;
+    public const int DefaultUserCount = 500;
+    public const int DefaultOwnerCount = 3;
+    public const int DefaultLinkCount = 1000;
 
     public static List<SeedInfo> Seeds = new()
     {
-        new(10, Guid.Parse("f28fa208-5bf9-481c-b65a-38b1fab56b3a")),
-        new(100, Guid.Parse("76482310-c21b-4496-b1ab-170cb7fbb657")),
-        new(1000, Guid.Parse("bab74279-bc45-4814-a4a4-0ea71ba654f4")),
-        new SeedInfo(10000, Guid.Parse("c48d7e55-eddb-4b79-84df-79ae5f3e2259"))
-        // new SeedInfo(100000, Guid.Parse("436af825-d2d5-4eb9-9086-daf5e9488cd9")),
+        new(Guid.Parse("f28fa208-5bf9-481c-b65a-38b1fab56b3a"), 10, DefaultUserCount, DefaultOwnerCount, DefaultLinkCount),
+        new(Guid.Parse("76482310-c21b-4496-b1ab-170cb7fbb657"), 100, DefaultUserCount, DefaultOwnerCount, DefaultLinkCount),
+        new(Guid.Parse("bab74279-bc45-4814-a4a4-0ea71ba654f4"), 1000, DefaultUserCount, DefaultOwnerCount, DefaultLinkCount),
+        new SeedInfo(Guid.Parse("c48d7e55-eddb-4b79-84df-79ae5f3e2259"), 10000, DefaultUserCount, DefaultOwnerCount, 10),
+        new SeedInfo(Guid.Parse("c48d7e55-eddb-4b79-84df-79ae5f3e2259"), 10000, DefaultUserCount, DefaultOwnerCount, 1000),
+        //new SeedInfo(Guid.Parse("436af825-d2d5-4eb9-9086-daf5e9488cd9"), 100000, DefaultUserCount, DefaultOwnerCount, DefaultLinkCount),
     };
 
-    public static async Task Seed(RelationalRepositoryContext relationalRepositoryContext,
+    public static async Task Seed(
+        RelationalRepositoryContext relationalRepositoryContext,
         MongoRepository mongoRepository)
     {
         var sw = new Stopwatch();
@@ -29,7 +32,9 @@ public static class Seeder
             sw.Restart();
 
             var (groups, users) =
-                FakeDataGenerator.GenerateGroups(seed.TenantId, seed.GroupCount, UserCount, OwnerCount);
+                FakeDataGenerator.GenerateGroups(seed);
+
+            // Parallalize
             await SeedRelational(relationalRepositoryContext, groups);
             await SeedDocument(mongoRepository, groups, users);
 
@@ -64,23 +69,14 @@ public static class Seeder
             new InsertOneModel<UserDocument>(new UserDocument { UserId = user.UserId, Name = user.Name }));
 
         await mongoRepository.UserCollection.BulkWriteAsync(usersInsertModel);
-    }
 
-    public class SeedInfo
-    {
-        public SeedInfo(int groupCount, Guid tenantId)
+        // Chunk
+        foreach (var group in groups)
         {
-            this.TenantId = tenantId;
-            this.GroupCount = groupCount;
-        }
+            var linksInsertModel = group.Links.Select(link =>
+                new InsertOneModel<LinkDocument>(new LinkDocument { LinkId = link.LinkId, Url = link.Url, GroupId = group.GroupId}));
 
-        public Guid TenantId { get; }
-
-        public int GroupCount { get; }
-
-        public override string ToString()
-        {
-            return $"{this.GroupCount} groups";
+            await mongoRepository.LinkCollection.BulkWriteAsync(linksInsertModel);
         }
     }
 }
