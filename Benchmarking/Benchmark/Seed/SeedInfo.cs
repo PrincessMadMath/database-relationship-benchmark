@@ -20,6 +20,6 @@ public class SeedInfo
 
     public override string ToString()
     {
-        return $"{this.GroupCount} g |  {this.LinkCount} l";
+        return $"{this.GroupCount} g | {this.LinkCount} o | {this.LinkCount} l";
     }
 }

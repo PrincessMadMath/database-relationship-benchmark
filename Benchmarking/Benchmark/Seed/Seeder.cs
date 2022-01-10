@@ -83,20 +83,33 @@ public static class Seeder
         Console.WriteLine(
             $"Seeds {groups.Count} groups with {groups.First().Links.Count} links in {sw.ElapsedMilliseconds}ms");
     }
+    
+    public static async Task Seed(
+        MongoRepository mongoRepository,
+        List<Group> groups, List<User> users)
+    {
+        var sw = Stopwatch.StartNew();
+
+        await SeedDocument(mongoRepository, groups, users);
+
+        sw.Stop();
+        Console.WriteLine(
+            $"Seeds {groups.Count} groups with {groups.First().Links.Count} links in {sw.ElapsedMilliseconds}ms");
+    }
 
     private static async Task SeedRelational(RelationalRepositoryContext relationalRepositoryContext,
         List<Group> groups)
     {
         var sw = Stopwatch.StartNew();
-
+    
         await Parallel.ForEachAsync(groups.Chunk(250), async (chunkedGroups, token) =>
         {
             await using var relationalRepository = new RelationalRepositoryContext(Configuration.PostgresOptions);
-
+    
             await relationalRepository.Groups.AddRangeAsync(chunkedGroups);
             await relationalRepository.SaveChangesAsync(token);
         });
-
+    
         Console.WriteLine($"    Relational: {sw.ElapsedMilliseconds}ms");
     }
 
@@ -119,13 +132,15 @@ public static class Seeder
         await mongoRepository.GroupCollection.BulkWriteAsync(groupsInsertModel);
         Console.WriteLine($"    Groups: {g.ElapsedMilliseconds}ms");
 
-        var u = Stopwatch.StartNew();
-        var usersInsertModel = users.Select(user =>
-            new InsertOneModel<UserDocument>(new UserDocument { UserId = user.UserId, Name = user.Name }));
+        if (users.Any())
+        {
+            var u = Stopwatch.StartNew();
+            var usersInsertModel = users.Select(user =>
+                new InsertOneModel<UserDocument>(new UserDocument { UserId = user.UserId, Name = user.Name }));
 
-        await mongoRepository.UserCollection.BulkWriteAsync(usersInsertModel);
-        Console.WriteLine($"    Users: {g.ElapsedMilliseconds}ms");
-
+            await mongoRepository.UserCollection.BulkWriteAsync(usersInsertModel);
+            Console.WriteLine($"    Users: {g.ElapsedMilliseconds}ms");
+        }
 
         var l = Stopwatch.StartNew();
         var links = new List<InsertOneModel<LinkDocument>>();
@@ -138,7 +153,7 @@ public static class Seeder
                     LinkId = link.LinkId, Url = link.Url, GroupId = group.GroupId
                 })));
         }
-
+        
         await Parallel.ForEachAsync(links.Chunk(1000), async (models, token) =>
         {
             await mongoRepository.LinkCollection.BulkWriteAsync(models, null, token);

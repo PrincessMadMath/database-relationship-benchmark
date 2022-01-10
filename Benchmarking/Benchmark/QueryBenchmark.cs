@@ -24,13 +24,13 @@ public class QueryBenchmark
         this._mongoRepository = new MongoRepository();
     }
 
-    [Benchmark]
-    public async Task PostgresEager()
-    {
-        var groups =
-            await RelationalQuery.GetTenantGroupsWithEagerLoading(this._relationalRepositoryContext,
-                this.SeedInfo.TenantId);
-    }
+    // [Benchmark]
+    // public async Task PostgresEager()
+    // {
+    //     var groups =
+    //         await RelationalQuery.GetTenantGroupsWithEagerLoading(this._relationalRepositoryContext,
+    //             this.SeedInfo.TenantId);
+    // }
 
     // [Benchmark]
     // public async Task MongoForeach()

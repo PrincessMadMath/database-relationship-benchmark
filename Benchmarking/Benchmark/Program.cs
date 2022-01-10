@@ -2,6 +2,9 @@
 
 using Benchmark;
 using Benchmark.Seed;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Exporters;
+using BenchmarkDotNet.Exporters.Csv;
 using BenchmarkDotNet.Running;
 using Domain.Document;
 using Domain.Relational;
@@ -13,4 +16,8 @@ var mongoRepository = new MongoRepository();
 // await Seeder.Seed(relationalRepository, mongoRepository);
 
 // await Configuration.CreateMaterializedView(mongoRepository);
-var summary = BenchmarkRunner.Run<QueryBenchmark>();
+
+var config = ManualConfig.CreateMinimumViable();
+config.AddExporter(CsvMeasurementsExporter.Default);
+config.AddExporter(RPlotExporter.Default);
+var summary = BenchmarkRunner.Run<MongoQueryBenchmark>(config);
