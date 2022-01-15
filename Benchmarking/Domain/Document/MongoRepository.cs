@@ -17,7 +17,7 @@ public class MongoRepository
     public MongoRepository()
     {
         // TODO: setup elsewhere
-        var mongoSetting = MongoClientSettings.FromConnectionString("mongodb+srv://dbUser:uEoVgaWvN6Qr8EHP@pib-cluster.at02f.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+        var mongoSetting = MongoClientSettings.FromConnectionString("mongodb://mongodb0.example.com:27017");
         mongoSetting.GuidRepresentation = GuidRepresentation.Standard;
 
         // Not working with filter...
